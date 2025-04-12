@@ -1,4 +1,4 @@
-read -p "$(echo -e ${WHITE_TEXT}${BOLD_TEXT}Enter your GCP Zone: ${RESET_FORMAT})" ZONE
+read -p "$(echo -e ${WHITE_TEXT}${BOLD_TEXT}Enter your zone: ${RESET_FORMAT})" ZONE
 
 gcloud services enable notebooks.googleapis.com
 
