@@ -18,7 +18,7 @@ curl -X POST --data-binary @values.json \
     "https://www.googleapis.com/storage/v1/b?project=$DEVSHELL_PROJECT_ID"
 
 echo "${BOLD}${YELLOW}Downloading demo image...${RESET}"
-curl -LO 
+curl -O https://raw.githubusercontent.com/Arcade-helper/Solutions/main/demo-image.png
 
 echo "${BOLD}${GREEN}Uploading demo image to the bucket...${RESET}"
 curl -X POST --data-binary @/home/$USERNAME/demo-image.png \
