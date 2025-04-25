@@ -1,4 +1,4 @@
-# Store, Process, and Manage Data on Google Cloud: Challenge Lab || ARC100 || By Arcade Helper
+# Build an AI Image Recognition app using Gemini on Vertex AI || bb-ide-genai-001 || By Arcade Helper
 
 ### Run the following Commands in CloudShell
  
