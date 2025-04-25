@@ -6,11 +6,11 @@ export REGION=
 ```
  
 ```
-curl -O https://raw.githubusercontent.com/Arcade-helper/Solutions/main/ARC100.sh
+curl -O "https://raw.githubusercontent.com/Arcade-helper/Solutions/main/Build%20an%20AI%20Image%20Generator%20app%20using%20Imagen%20on%20Vertex%20AI/bb-ide-genai-002.sh"
 
-chmod +x ARC100.sh
+chmod +x bb-ide-genai-002.sh
 
-./ARC100.sh
+./bb-ide-genai-002.sh
 ```
 
 ### Congratulations 🎉 for Successfully Completing the Lab !
