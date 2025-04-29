@@ -26,15 +26,15 @@ gcloud compute scp cp_disk.sh apache-vm:/tmp --project=$DEVSHELL_PROJECT_ID --zo
 
 gcloud compute ssh apache-vm --project=$DEVSHELL_PROJECT_ID --zone=$ZONE --quiet --command="bash /tmp/cp_disk.sh"
 
-gcloud monitoring uptime create arcadecrew \
+gcloud monitoring uptime create arcadehelper \
   --resource-type="gce-instance" \
   --resource-labels=project_id=$DEVSHELL_PROJECT_ID,instance_id=$INSTANCE_ID,zone=$ZONE
 
 cat > email-channel.json <<EOF_CP
 {
   "type": "email",
-  "displayName": "arcadecrew",
-  "description": "Arcade Crew",
+  "displayName": "arcadehelper",
+  "description": "Subscribe to Arcade Helper",
   "labels": {
     "email_address": "$USER_EMAIL"
   }
