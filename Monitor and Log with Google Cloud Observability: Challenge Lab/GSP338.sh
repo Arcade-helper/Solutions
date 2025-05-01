@@ -17,42 +17,35 @@ export ZONE=$(gcloud compute project-info describe \
 export REGION=$(gcloud compute project-info describe \
 --format="value(commonInstanceMetadata.items[google-compute-default-region])")
 
-## Install Golang
 sudo apt update && sudo apt -y
 sudo apt-get install wget -y
 sudo apt-get -y install git
 sudo chmod 777 /usr/local/
-sudo wget https://go.dev/dl/go1.22.8.linux-amd64.tar.gz 
+sudo wget https://go.dev/dl/go1.22.8.linux-amd64.tar.gz
 sudo tar -C /usr/local -xzf go1.22.8.linux-amd64.tar.gz
 export PATH=$PATH:/usr/local/go/bin
 
-# Install ops agent 
 curl -sSO https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh
 sudo bash add-google-cloud-ops-agent-repo.sh --also-install
 sudo service google-cloud-ops-agent start
 
-# Create go working directory and add go path
 mkdir /work
 mkdir /work/go
 mkdir /work/go/cache
 export GOPATH=/work/go
 export GOCACHE=/work/go/cache
 
-# Install Video queue Go source code
 cd /work/go
 mkdir video
 gsutil cp gs://spls/gsp338/video_queue/main.go /work/go/video/main.go
 
-# Get Cloud Monitoring (stackdriver) modules
 go get go.opencensus.io
 go get contrib.go.opencensus.io/exporter/stackdriver
 
-# Configure env vars for the Video Queue processing application
 export MY_PROJECT_ID=$DEVSHELL_PROJECT_ID
 export MY_GCE_INSTANCE_ID=$INSTANCE_ID
 export MY_GCE_INSTANCE_ZONE=$ZONE
 
-# Initialize and run the Go application
 cd /work
 go mod init go/video/main
 go mod tidy
@@ -73,7 +66,7 @@ cat > email-channel.json <<EOF_END
 {
   "type": "email",
   "displayName": "arcadehelper",
-  "description": "Awesome",
+  "description": "subscribe to arcade helper",
   "labels": {
     "email_address": "$USER_EMAIL"
   }
@@ -124,7 +117,13 @@ cat > arcadehelper.json <<EOF_END
 }
 EOF_END
 
-# Create the alert policy
 gcloud alpha monitoring policies create --policy-from-file=arcadehelper.json
 
-echo "${CYAN}${BOLD}Click here: "${RESET}""${BLUE}${BOLD}""https://console.cloud.google.com/monitoring/dashboards?project=$DEVSHELL_PROJECT_ID"""${RESET}"
+echo " Monitoring Dashboard Link:"
+echo "https://console.cloud.google.com/monitoring/dashboards?project=$DEVSHELL_PROJECT_ID"
+echo
+
+echo "Expected Metrics: input_queue_size, ${METRIC}"
+echo
+
+echo "--------------------------NOW FOLLOW VIDEO STEPS--------------------------------"
