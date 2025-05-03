@@ -1,5 +1,20 @@
+#!/bin/bash
+BLACK_TEXT=$'\033[0;90m'
+RED_TEXT=$'\033[0;91m'
+GREEN_TEXT=$'\033[0;92m'
+YELLOW_TEXT=$'\033[0;93m'
+BLUE_TEXT=$'\033[0;94m'
+MAGENTA_TEXT=$'\033[0;95m'
+CYAN_TEXT=$'\033[0;96m'
+WHITE_TEXT=$'\033[0;97m'
+RESET_FORMAT=$'\033[0m'
+BOLD_TEXT=$'\033[1m'
+UNDERLINE_TEXT=$'\033[4m'
+clear
+
 export REGION="${ZONE%-*}"
 
+echo "${CYAN_TEXT}${BOLD_TEXT}Enabling required Google Cloud services...${RESET_FORMAT}"
 gcloud services enable \
     artifactregistry.googleapis.com \
     cloudfunctions.googleapis.com \
@@ -9,34 +24,46 @@ gcloud services enable \
     logging.googleapis.com \
     pubsub.googleapis.com
 
+echo "${YELLOW_TEXT}${BOLD_TEXT}Waiting for services to be enabled...${RESET_FORMAT}"
 sleep 30
 
+echo "${CYAN_TEXT}${BOLD_TEXT}Fetching project number...${RESET_FORMAT}"
 PROJECT_NUMBER=$(gcloud projects describe $DEVSHELL_PROJECT_ID --format='value(projectNumber)')
 
+echo "${CYAN_TEXT}${BOLD_TEXT}Adding IAM policy bindings for Eventarc...${RESET_FORMAT}"
 gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \
         --member=serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com \
         --role=roles/eventarc.eventReceiver
 
+echo "${YELLOW_TEXT}${BOLD_TEXT}Waiting for IAM policy binding to take effect...${RESET_FORMAT}"
 sleep 20
 
+echo "${CYAN_TEXT}${BOLD_TEXT}Fetching service account for KMS...${RESET_FORMAT}"
 SERVICE_ACCOUNT="$(gsutil kms serviceaccount -p $DEVSHELL_PROJECT_ID)"
 
+echo "${CYAN_TEXT}${BOLD_TEXT}Adding IAM policy bindings for Pub/Sub publisher...${RESET_FORMAT}"
 gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \
         --member="serviceAccount:${SERVICE_ACCOUNT}" \
         --role='roles/pubsub.publisher'
 
+echo "${YELLOW_TEXT}${BOLD_TEXT}Waiting for IAM policy binding to take effect...${RESET_FORMAT}"
 sleep 20
 
+echo "${CYAN_TEXT}${BOLD_TEXT}Adding IAM policy bindings for Service Account Token Creator...${RESET_FORMAT}"
 gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \
         --member=serviceAccount:service-$PROJECT_NUMBER@gcp-sa-pubsub.iam.gserviceaccount.com \
         --role=roles/iam.serviceAccountTokenCreator
 
+echo "${YELLOW_TEXT}${BOLD_TEXT}Waiting for IAM policy binding to take effect...${RESET_FORMAT}"
 sleep 20
 
+echo "${CYAN_TEXT}${BOLD_TEXT}Creating a Cloud Storage bucket...${RESET_FORMAT}"
 gsutil mb -l $REGION gs://$DEVSHELL_PROJECT_ID-bucket
 
+echo "${CYAN_TEXT}${BOLD_TEXT}Creating Pub/Sub topic: $TOPIC...${RESET_FORMAT}"
 gcloud pubsub topics create $TOPIC
 
+echo "${CYAN_TEXT}${BOLD_TEXT}Setting up the Cloud Function code...${RESET_FORMAT}"
 mkdir lol
 cd lol
 
@@ -140,12 +167,14 @@ EOF_END
 PROJECT_ID=$(gcloud config get-value project)
 BUCKET_SERVICE_ACCOUNT="${PROJECT_ID}@${PROJECT_ID}.iam.gserviceaccount.com"
 
+echo "${CYAN_TEXT}${BOLD_TEXT}Adding IAM policy bindings for Pub/Sub publisher...${RESET_FORMAT}"
 gcloud projects add-iam-policy-binding $PROJECT_ID \
     --member=serviceAccount:$BUCKET_SERVICE_ACCOUNT \
     --role=roles/pubsub.publisher
 
 # Your existing deployment command
 deploy_function() {
+        echo "${CYAN_TEXT}${BOLD_TEXT}Deploying Cloud Function: $FUNCTION...${RESET_FORMAT}"
         gcloud functions deploy $FUNCTION \
         --gen2 \
         --runtime nodejs20 \
@@ -167,18 +196,21 @@ while true; do
 
     # Check if Cloud Run service is created
     if gcloud run services describe $SERVICE_NAME --region $REGION &> /dev/null; then
-        echo "Cloud Run service is created. Exiting the loop."
+        echo "${GREEN_TEXT}${BOLD_TEXT}Cloud Run service is created. Exiting the loop.${RESET_FORMAT}"
         break
     else
-        echo "Waiting for Cloud Run service to be created..."
+        echo "${YELLOW_TEXT}${BOLD_TEXT}Waiting for Cloud Run service to be created...${RESET_FORMAT}"
         sleep 20
     fi
 done
 
+echo "${CYAN_TEXT}${BOLD_TEXT}Downloading sample image...${RESET_FORMAT}"
 curl -o map.jpg https://storage.googleapis.com/cloud-training/gsp315/map.jpg
 
+echo "${CYAN_TEXT}${BOLD_TEXT}Uploading sample image to Cloud Storage bucket...${RESET_FORMAT}"
 gsutil cp map.jpg gs://$DEVSHELL_PROJECT_ID-bucket/map.jpg
 
+echo "${CYAN_TEXT}${BOLD_TEXT}Removing IAM policy binding for user: $USER_2...${RESET_FORMAT}"
 gcloud projects remove-iam-policy-binding $DEVSHELL_PROJECT_ID \
 --member=user:$USER_2 \
 --role=roles/viewer
