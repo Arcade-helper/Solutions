@@ -313,7 +313,7 @@ terraform apply --auto-approve
 
 cd ~
 
-curl 
-curl 
+curl https://raw.githubusercontent.com/Arcade-helper/Solutions/main/Interact%20with%20Terraform%20Modules/index.html > index.html
+curl https://raw.githubusercontent.com/Arcade-helper/Solutions/main/Interact%20with%20Terraform%20Modules/error.html > error.html
 
 gsutil cp *.html gs://$DEVSHELL_PROJECT_ID
