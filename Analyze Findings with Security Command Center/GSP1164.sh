@@ -43,6 +43,8 @@ gcloud pubsub topics create projects/$DEVSHELL_PROJECT_ID/topics/export-findings
 
 gcloud pubsub subscriptions create export-findings-pubsub-topic-sub --topic=projects/$DEVSHELL_PROJECT_ID/topics/export-findings-pubsub-topic
 
+echo "${BOLD}${BLUE}Please open the URL to create export-findings-pubsub: ${RESET}""https://console.cloud.google.com/security/command-center/config/continuous-exports/pubsub?project=$DEVSHELL_PROJECT_ID"
+
 function check_progress {
     while true; do
         echo
