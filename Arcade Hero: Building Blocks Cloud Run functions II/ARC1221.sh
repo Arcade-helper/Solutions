@@ -1,18 +1,43 @@
 read -p "Export REGION :- " REGION
 
-REPO_NAME="container-registry"
-FORMAT="DOCKER"
-POLICY_NAME="Grandfather"
-KEEP_COUNT=3
+mkdir ~/hello-go && cd ~/hello-go
 
-gcloud artifacts repositories create $REPO_NAME \
-  --repository-format=$FORMAT \
-  --location=$REGION \
-  --description="Docker repo for container images"
+cat > main.go <<EOF_END
+package function
 
-gcloud artifacts policies create $POLICY_NAME \
-   --repository=$REPO_NAME \
-   --location=$REGION \
-   --package-type=$FORMAT \
-   --keep-count=$KEEP_COUNT \
-   --action=DELETE
+import (
+    "fmt"
+    "net/http"
+)
+
+// HelloGo is the entry point
+func HelloGo(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprint(w, "Hello from Cloud Functions (Go 2nd Gen)!")
+}
+EOF_END
+
+cat > go.mod <<EOF_END
+module example.com/hellogo
+
+go 1.21
+EOF_END
+
+gcloud functions deploy cf-go \
+  --gen2 \
+  --runtime=go121 \
+  --region=$REGION \
+  --trigger-http \
+  --allow-unauthenticated \
+  --entry-point=HelloGo \
+  --source=. \
+  --min-instances=5
+
+echo "n" | gcloud functions deploy cf-pubsub \
+  --gen2 \
+  --region=$REGION \
+  --runtime=go121 \
+  --trigger-topic=cf-pubsub \
+  --min-instances=5 \
+  --entry-point=helloWorld \
+  --source=. \
+  --allow-unauthenticated
