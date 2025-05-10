@@ -1,6 +1,8 @@
+export ZONE=$ZONE
+
 gcloud config set compute/zone $ZONE
 
-gcloud container clusters create test-cluster --num-nodes=3  --enable-ip-alias
+gcloud container clusters create test-cluster --num-nodes=3 --enable-ip-alias
 
 cat << EOF > gb_frontend_pod.yaml
 apiVersion: v1
@@ -60,19 +62,31 @@ kubectl apply -f gb_frontend_ingress.yaml
 sleep 70
 
 BACKEND_SERVICE=$(gcloud compute backend-services list | grep NAME | cut -d ' ' -f2)
-
 gcloud compute backend-services get-health $BACKEND_SERVICE --global
 
 kubectl get ingress gb-frontend-ingress
 
-echo "${YELLOW}${BOLD}NOW${RESET}" "${WHITE}${BOLD}Check The Score${RESET}" "${GREEN}${BOLD}For Task 1. Within 2 Minute${RESET}"
+# Prompt user to check the score for Task 1
+echo "${YELLOW_TEXT}${BOLD_TEXT}NOW${RESET_FORMAT} ${WHITE_TEXT}${BOLD_TEXT}Check The Score${RESET_FORMAT} ${GREEN_TEXT}${BOLD_TEXT}For Task 1.${RESET_FORMAT}"
 
-sleep 120
+while true; do
+    read -p "${MAGENTA_TEXT}${BOLD_TEXT}Have you checked the progress for Task 1? (Y/N): ${RESET_FORMAT}" user_input
+    case $user_input in
+        [Yy]|[Yy][Ee][Ss])
+            echo "${GREEN_TEXT}Proceeding to the next step...${RESET_FORMAT}"
+            break
+            ;;
+        [Nn]|[Nn][Oo])
+            echo "${RED_TEXT}Please check the progress for Task 1 before proceeding.${RESET_FORMAT}"
+            ;;
+        *)
+            echo "${RED_TEXT}Invalid input. Please enter Y or N.${RESET_FORMAT}"
+            ;;
+    esac
+done
 
 gsutil -m cp -r gs://spls/gsp769/locust-image .
-
-gcloud builds submit \
-    --tag gcr.io/${GOOGLE_CLOUD_PROJECT}/locust-tasks:latest locust-image
+gcloud builds submit --tag gcr.io/${GOOGLE_CLOUD_PROJECT}/locust-tasks:latest locust-image
 
 gcloud container images list
 
