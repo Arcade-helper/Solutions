@@ -72,6 +72,7 @@ EOF
 
 kubectl apply -f gb_frontend_ingress.yaml
 
+echo "${YELLOW_TEXT}${BOLD_TEXT}Waiting for 70 seconds to allow resources to stabilize...${RESET_FORMAT}"
 sleep 70
 
 BACKEND_SERVICE=$(gcloud compute backend-services list | grep NAME | cut -d ' ' -f2)
@@ -106,6 +107,7 @@ gcloud container images list
 gsutil cp gs://spls/gsp769/locust_deploy_v2.yaml .
 sed 's/${GOOGLE_CLOUD_PROJECT}/'$GOOGLE_CLOUD_PROJECT'/g' locust_deploy_v2.yaml | kubectl apply -f -
 
+echo "${YELLOW_TEXT}${BOLD_TEXT}Waiting for 70 seconds to allow resources to stabilize...${RESET_FORMAT}"
 sleep 70
 
 cat << EOF > liveness-demo.yaml
@@ -179,6 +181,7 @@ EOF
 
 kubectl apply -f readiness-demo.yaml
 
+echo "${YELLOW_TEXT}${BOLD_TEXT}Waiting for 70 seconds to allow resources to stabilize...${RESET_FORMAT}"
 sleep 70
 
 kubectl exec readiness-demo-pod -- touch /tmp/healthz
