@@ -1,3 +1,16 @@
+#!/bin/bash
+
+# Define color variables
+YELLOW_TEXT=$'\033[0;33m'
+MAGENTA_TEXT=$'\033[0;35m'
+NO_COLOR=$'\033[0m'
+GREEN_TEXT=$'\033[0;32m'
+RED_TEXT=$'\033[0;31m'
+CYAN_TEXT=$'\033[0;36m'
+BOLD_TEXT=$'\033[1m'
+RESET_FORMAT=$'\033[0m'
+BLUE_TEXT=$'\033[0;34m'
+
 export ZONE=$ZONE
 
 gcloud config set compute/zone $ZONE
