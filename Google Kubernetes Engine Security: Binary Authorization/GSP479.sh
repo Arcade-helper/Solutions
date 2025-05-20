@@ -44,6 +44,7 @@ gcloud beta container binauthz policy import policy.yaml
 docker pull gcr.io/google-containers/nginx:latest
 gcloud auth configure-docker --quiet
 
+PROJECT_ID="$(gcloud config get-value project)"
 docker tag gcr.io/google-containers/nginx "gcr.io/${PROJECT_ID}/nginx:latest"
 docker push "gcr.io/${PROJECT_ID}/nginx:latest"
 
@@ -209,9 +210,9 @@ gcloud beta container binauthz attestations list \
 gcloud beta container binauthz policy import policy.yaml
 
 gcloud beta container binauthz policy update \
---project=${PROJECT_ID} \
---require-attestations \
---attestor="projects/${PROJECT_ID}/attestors/${ATTESTOR}"
+    --project=${PROJECT_ID} \
+    --require-attestations \
+    --attestor="projects/${PROJECT_ID}/attestors/${ATTESTOR}"
 
 IMAGE_PATH="gcr.io/${PROJECT_ID}/nginx"
 IMAGE_DIGEST="$(gcloud container images list-tags --format='get(digest)' $IMAGE_PATH | head -1)"
@@ -248,5 +249,3 @@ EOF
 
 echo "${CYAN_TEXT}${BOLD_TEXT}Attestor resource path: projects/${PROJECT_ID}/attestors/${ATTESTOR}${NO_COLOR}"
 echo "${CYAN_TEXT}${BOLD_TEXT}Binary Authorization policy URL: https://console.cloud.google.com/security/binary-authorization/policy?referrer=search&project=$DEVSHELL_PROJECT_ID${NO_COLOR}"
-
-
