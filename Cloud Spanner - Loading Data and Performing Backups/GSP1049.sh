@@ -1,7 +1,16 @@
+gcloud auth list
+
+gcloud config set compute/region $REGION
+
+export PROJECT_ID=$(gcloud config get-value project)
+
+export PROJECT_ID=$DEVSHELL_PROJECT_ID
+
+
 gcloud spanner databases execute-sql banking-db --instance=banking-instance \
  --sql="INSERT INTO Customer (CustomerId, Name, Location) VALUES ('bdaaaa97-1b4b-4e58-b4ad-84030de92235', 'Richard Nelson', 'Ada Ohio')"
 
-cat > insert.py <<EOF
+cat > insert.py <<EOF_CP
 from google.cloud import spanner
 from google.cloud.spanner_v1 import param_types
 INSTANCE_ID = "banking-instance"
@@ -17,13 +26,15 @@ def insert_customer(transaction):
     print("{} record(s) inserted.".format(row_ct))
 database.run_in_transaction(insert_customer)
 
-EOF
+EOF_CP
 
 python3 insert.py
 
+
 sleep 60
 
-cat > batch_insert.py <<EOF
+
+cat > batch_insert.py <<EOF_CP
 from google.cloud import spanner
 from google.cloud.spanner_v1 import param_types
 INSTANCE_ID = "banking-instance"
@@ -43,7 +54,8 @@ with database.batch() as batch:
         ],
     )
 print("Rows inserted")
-EOF
+EOF_CP
+
 
 python3 batch_insert.py
 
@@ -53,9 +65,14 @@ gsutil mb gs://$DEVSHELL_PROJECT_ID
 touch emptyfile
 gsutil cp emptyfile gs://$DEVSHELL_PROJECT_ID/tmp/emptyfile
 
+
 gcloud services disable dataflow.googleapis.com --force
 gcloud services enable dataflow.googleapis.com
 
-sleep 80
 
-gcloud dataflow jobs run spanner-load --gcs-location gs://dataflow-templates-us-west1/latest/GCS_Text_to_Cloud_Spanner --region us-west1 --staging-location gs://$DEVSHELL_PROJECT_ID/tmp/ --parameters instanceId=banking-instance,databaseId=banking-db,importManifest=gs://cloud-training/OCBL372/manifest.json
+sleep 90
+
+gcloud dataflow jobs run spanner-load --gcs-location gs://dataflow-templates-$REGION/latest/GCS_Text_to_Cloud_Spanner --region $REGION --staging-location gs://$DEVSHELL_PROJECT_ID/tmp/ --parameters instanceId=banking-instance,databaseId=banking-db,importManifest=gs://cloud-training/OCBL372/manifest.json
+
+
+echo " Click here to check Dataflow Job is succeeded https://console.cloud.google.com/dataflow/jobs?referrer=search&project=$DEVSHELL_PROJECT_ID"
