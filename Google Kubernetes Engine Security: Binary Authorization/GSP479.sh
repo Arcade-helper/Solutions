@@ -4,7 +4,7 @@ gcloud services enable compute.googleapis.com
 gcloud services enable container.googleapis.com 
 gcloud services enable containerregistry.googleapis.com 
 gcloud services enable containeranalysis.googleapis.com 
-gcloud services enable binaryauthorization.googleapis.com
+gcloud services enable binaryauthorization.googleapis.com 
 
 sleep 50
 
@@ -42,9 +42,11 @@ EOF_END
 gcloud beta container binauthz policy import policy.yaml
 
 docker pull gcr.io/google-containers/nginx:latest
+
 gcloud auth configure-docker --quiet
 
 PROJECT_ID="$(gcloud config get-value project)"
+
 docker tag gcr.io/google-containers/nginx "gcr.io/${PROJECT_ID}/nginx:latest"
 docker push "gcr.io/${PROJECT_ID}/nginx:latest"
 
@@ -96,8 +98,10 @@ spec:
     - containerPort: 80
 EOF
 
+# Filter logs by resource type Kubernetes Container and cluster name stackdriver-logging
 gcloud logging read "resource.type='k8s_cluster'  AND protoPayload.response.reason='VIOLATES_POLICY'" --project=$DEVSHELL_PROJECT_ID
 
+# Run a specific query
 gcloud logging read "resource.type='k8s_cluster'  AND protoPayload.response.reason='VIOLATES_POLICY'" --project=$DEVSHELL_PROJECT_ID --format=json
 
 IMAGE_PATH=$(echo "gcr.io/${PROJECT_ID}/nginx*")
@@ -114,6 +118,7 @@ clusterAdmissionRules:
 admissionWhitelistPatterns:
 - namePattern: "gcr.io/${DEVSHELL_PROJECT_ID}/nginx*"
 name: projects/$DEVSHELL_PROJECT_ID/policy
+
 EOF_END
 
 gcloud beta container binauthz policy import policy.yaml
@@ -169,6 +174,8 @@ sudo apt-get install rng-tools -y
 
 sudo rngd -r /dev/urandom -y
 
+##gpg --quick-generate-key --yes ${ATTESTOR_EMAIL} --quiet 
+
 gcloud --project="${PROJECT_ID}" \
     beta container binauthz attestors create "${ATTESTOR}" \
     --attestation-authority-note="${NOTE_ID}" \
@@ -210,9 +217,11 @@ gcloud beta container binauthz attestations list \
 gcloud beta container binauthz policy import policy.yaml
 
 gcloud beta container binauthz policy update \
-    --project=${PROJECT_ID} \
-    --require-attestations \
-    --attestor="projects/${PROJECT_ID}/attestors/${ATTESTOR}"
+--project=${PROJECT_ID} \
+--require-attestations \
+--attestor="projects/${PROJECT_ID}/attestors/${ATTESTOR}"
+
+## need to test
 
 IMAGE_PATH="gcr.io/${PROJECT_ID}/nginx"
 IMAGE_DIGEST="$(gcloud container images list-tags --format='get(digest)' $IMAGE_PATH | head -1)"
@@ -247,5 +256,6 @@ EOF
 
 ./delete.sh -c my-cluster-1
 
-echo "${CYAN_TEXT}${BOLD_TEXT}Attestor resource path: projects/${PROJECT_ID}/attestors/${ATTESTOR}${NO_COLOR}"
-echo "${CYAN_TEXT}${BOLD_TEXT}Binary Authorization policy URL: https://console.cloud.google.com/security/binary-authorization/policy?referrer=search&project=$DEVSHELL_PROJECT_ID${NO_COLOR}"
+echo "projects/${PROJECT_ID}/attestors/${ATTESTOR}" # Copy this output to your copy/paste buffer
+
+echo "https://console.cloud.google.com/security/binary-authorization/policy?referrer=search&project=$DEVSHELL_PROJECT_ID"
