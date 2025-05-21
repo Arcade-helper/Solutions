@@ -19,9 +19,12 @@ def insert_customer(transaction):
     )
     print("{} record(s) inserted.".format(row_ct))
 database.run_in_transaction(insert_customer)
+
 EOF
 
 python3 insert.py
+
+sleep 60
 
 cat > batch_insert.py <<EOF
 from google.cloud import spanner
@@ -47,6 +50,8 @@ EOF
 
 python3 batch_insert.py
 
+sleep 60
+
 gsutil mb gs://$DEVSHELL_PROJECT_ID
 touch emptyfile
 gsutil cp emptyfile gs://$DEVSHELL_PROJECT_ID/tmp/emptyfile
@@ -54,10 +59,6 @@ gsutil cp emptyfile gs://$DEVSHELL_PROJECT_ID/tmp/emptyfile
 gcloud services disable dataflow.googleapis.com --force
 gcloud services enable dataflow.googleapis.com
 
-gcloud dataflow jobs run spanner-load \
-  --gcs-location gs://dataflow-templates-$REGION/latest/GCS_Text_to_Cloud_Spanner \
-  --region $REGION \
-  --staging-location gs://$DEVSHELL_PROJECT_ID/tmp \
-  --parameters ^~^instanceId=banking-instance~databaseId=banking-db~spannerHost=https://batch-spanner.googleapis.com~importManifest=gs://cloud-training/OCBL372/manifest.json~columnDelimiter=,~fieldQualifier=\"~trailingDelimiter=true~handleNewLine=false \
-  --worker-machine-type=e2-medium \
-  --num-workers=1
+sleep 80
+
+gcloud dataflow jobs run spanner-load --gcs-location gs://dataflow-templates-us-west1/latest/GCS_Text_to_Cloud_Spanner --region $REGION --staging-location gs://$DEVSHELL_PROJECT_ID/tmp/ --parameters instanceId=banking-instance,databaseId=banking-db,importManifest=gs://cloud-training/OCBL372/manifest.json
